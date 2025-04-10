@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jogo Canvas 2D</title>
+  <style>
+    body {
+      margin: 0;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    canvas {
+      background-color: #fff;
+      border: 2px solid #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="cnvs" width="1000" height="400"></canvas>
+
+<script>
+const cnvs = document.getElementById('cnvs')
+const ctx = cnvs.getContext('2d')
+
+document.addEventListener('keypress', (evnt) => {
+    if (!jogo.ativ){
+     return
+    }
+    if (evnt.code === 'Space' && pers.pulando === false){
+     pers.saltar()
+    }
+    if (evnt.code === 'KeyA'){
+      pers.andarn()
+    }
+    if (evnt.code === 'KeyD'){
+     pers.andarm()
+    }
+})
+
+class Enti {
+    constructor(x, y, larg, alt, cor) {
+        this.x = x
+        this.y = y
+        this.larg = larg
+        this.alt = alt
+        this.cor = cor
+    }
+    desenhar() {
+        ctx.fillStyle = this.cor
+        ctx.fillRect(this.x, this.y, this.larg, this.alt)
+    }
+}
+
+class Pers extends Enti {
+    #vely
+    #velx
+    constructor(x, y, larg, alt, cor) {
+        super(x, y, larg, alt, cor)
+        this.#vely = 0
+        this.#velx = 0
+        this.pulando = false
+    }
+    saltar() {
+        this.#vely = 15
+        this.pulando = true
+    }
+    andarn() {
+        this.#velx = -5
+    }
+    andarm() {
+        this.#velx = 5
+    }
+    atualizar() {
+        this.x += this.#velx
+        if (this.pulando) {
+            this.y -= this.#vely
+            this.#vely -= 0.5
+            if (this.y >= cnvs.height - 50) {
+                this.y = cnvs.height - 50
+                this.pulando = false
+            }
+        }
+    }
+    colis(ent1, ent2) {
+     return (
+         ent1.x < ent2.x + ent2.larg &&
+         ent1.x + ent1.larg > ent2.x &&
+         ent1.y < ent2.y + ent2.alt &&
+         ent1.y + ent1.alt > ent2.y
+     )
+    }
+}
+
+class Obst extends Enti {
+    constructor(x, y, larg, alt, cor, vel) {
+        super(x, y, larg, alt, cor)
+        this.vel = vel
+    }
+    atualizar() {
+        this.x -= this.vel
+    }
+    fora() {
+        return this.x + this.larg < 0
+    }
+}
+
+function colis(ent1, ent2) {
+    return (
+        ent1.x < ent2.x + ent2.larg &&
+        ent1.x + ent1.larg > ent2.x &&
+        ent1.y < ent2.y + ent2.alt &&
+        ent1.y + ent1.alt > ent2.y
+    )
+}
+
+class Jogo {
+    constructor() {
+        this.ativ = true
+        this.obs = []
+        this.temp = 0
+        this.pont = 0
+        this.loop = this.loop.bind(this)
+    }
+    criarObs() {
+        const larg = 50
+        const alt = Math.random() * 100 + 30
+        const y = cnvs.height - alt
+        const x = cnvs.width + Math.random() * 300
+        const cor = Math.random() < 0.5 ? 'red' : 'green'
+        const vel = Math.random() * 4 + 2
+        this.obs.push(new Obst(x, y, larg, alt, cor, vel))
+    }
+    gameOver() {
+        ctx.fillStyle = 'black'
+        ctx.font = '48px Arial'
+        ctx.fillText('GAME OVER', cnvs.width / 2 - 150, cnvs.height / 2)
+    }
+    mostrarPont() {
+        ctx.fillStyle = 'black'
+        ctx.font = '24px Arial'
+        ctx.fillText('Score: ' + this.pont, 20, 30)
+    }
+    loop() {
+        ctx.clearRect(0, 0, cnvs.width, cnvs.height)
+        pers.desenhar()
+        pers.atualizar()
+        for (let i = this.obs.length - 1; i >= 0; i--) {
+            const obs = this.obs[i]
+            obs.desenhar()
+            obs.atualizar()
+            if (colis(pers, obs)) {
+                this.ativ = false
+                this.gameOver()
+                this.mostrarPont()
+            }
+            if (obs.fora()) this.obs.splice(i, 1)
+        }
+        this.temp--
+        if (this.temp <= 0) {
+            this.criarObs()
+            this.temp = Math.floor(Math.random() * 100 + 80)
+        }
+        this.pont++
+        this.mostrarPont()
+        if (this.ativ) requestAnimationFrame(this.loop)
+    }
+}
+
+const pers = new Pers(100, cnvs.height - 50, 50, 50, 'blue')
+const jogo = new Jogo()
+jogo.loop()
+</script>
+</body>
+</html>
