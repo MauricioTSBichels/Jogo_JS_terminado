@@ -26,7 +26,7 @@
 const cnvs = document.getElementById('cnvs')
 const ctx = cnvs.getContext('2d')
 
-document.addEventListener('keypress', (evnt) => {
+document.addEventListener('keydown', (evnt) => {
     if (!jogo.ativ){
      return
     }
@@ -34,10 +34,21 @@ document.addEventListener('keypress', (evnt) => {
      pers.saltar()
     }
     if (evnt.code === 'KeyA'){
+      pers.movx=true  
       pers.andarn()
     }
     if (evnt.code === 'KeyD'){
+     pers.movx=true   
      pers.andarm()
+    }
+})
+
+document.addEventListener('keyup', (event) => {
+    if (event.code === 'KeyA'){
+      pers.movx=false  
+    }
+    if (event.code === 'KeyD'){
+     pers.movx=false   
     }
 })
 
@@ -62,20 +73,37 @@ class Pers extends Enti {
         super(x, y, larg, alt, cor)
         this.#vely = 0
         this.#velx = 0
+        this.movx= true
         this.pulando = false
     }
     saltar() {
         this.#vely = 15
         this.pulando = true
     }
-    andarn() {
-        this.#velx = -5
-    }
-    andarm() {
-        this.#velx = 5
-    }
+     andarn() {
+        if (pers.movx==true) {
+         this.#velx = -5
+        }
+        else {
+         this.#velx=0   
+        } 
+     }
+     andarm() {
+        if (pers.movx==true) {
+         this.#velx = 5
+        }
+        else {
+         this.#velx=0   
+        }  
+     }
     atualizar() {
         this.x += this.#velx
+        if (this.x<5) {
+         this.#velx=0   
+        }
+        if (this.x>950) {
+         this.#velx=0   
+        }
         if (this.pulando) {
             this.y -= this.#vely
             this.#vely -= 0.5
