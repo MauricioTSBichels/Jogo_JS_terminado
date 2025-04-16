@@ -159,12 +159,12 @@ class Jogo {
 
     }
     criarObs() {
-        const larg = 50
+        const larg = Math.random() * 100 + 25
         const alt = Math.random() * 100 + 30
         const y = cnvs.height - alt
         const x = cnvs.width + Math.random() * 300
         const cor = Math.random() < 0.5 ? 'red' : 'green'
-        const vel = Math.random() * 4 + 2
+        const vel = Math.random() * 4 + 6
         this.obs.push(new Obst(x, y, larg, alt, cor, vel))
     }
     gameOver() {
